@@ -11,6 +11,7 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    let DataDirectory = NSHomeDirectory()+"/Data.txt"
     var window: UIWindow?
     var centerContainer: MMDrawerController?
     
@@ -18,7 +19,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         print("didFinishLaunchingWithOptions in AppDelegate")
-        //var rootViewController = self.window!.rootViewController
+        
+        
+        readFile()
+        
         
         let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         
@@ -42,6 +46,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window!.rootViewController = centerContainer
         window!.makeKeyAndVisible()
         return true
+    }
+    
+    private func readFile(){
+        let path = Bundle.main.path(forResource: "Data", ofType: "txt")
+        do {
+            var i = 0
+
+            let start = DispatchTime.now() // <<<<<<<<<< Start time
+            
+            if let aStreamReader = StreamReader(path: path!) {
+                defer {
+                    aStreamReader.close()
+                }
+                
+                while let line = aStreamReader.nextLine() {
+                    i += 1
+                    print(line)
+                }
+            }
+            
+            
+            //let txt = try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+            //let myStrings = txt.components(separatedBy: NSCharacterSet.newlines)
+            
+            let end = DispatchTime.now()   // <<<<<<<<<<   end time
+            let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
+            let timeInterval = Double(nanoTime) / 1_000_000_000 // Technically could overflow for long running tests
+            print("lines:\(i)")
+            print("Time : \(timeInterval) seconds")
+            //print(txt)
+        }catch{
+            print("\(path)")
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

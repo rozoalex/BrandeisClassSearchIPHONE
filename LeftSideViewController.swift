@@ -1,9 +1,5 @@
-//
-//  LeftSideViewController.swift
-//  BrandeisClassSearchIPHONE
-//
+
 //  Created by Yuanze Hu on 12/22/16.
-//  Copyright © 2016 Yuanze Hu. All rights reserved.
 //  
 //  This class handles all the navigation actions
 
@@ -65,9 +61,11 @@ class LeftSideViewController: UIViewController, UITableViewDataSource,UITableVie
         }
         
         
+        
+        
     }
     
-    //A helper
+    //A helper func
     func doSwitch(SomeViewController: UIViewController ){
         let centerNavController = UINavigationController(rootViewController: SomeViewController)
         let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate

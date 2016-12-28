@@ -22,6 +22,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="contactAdd" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S57-W1-c7o">
+                                <rect key="frame" x="266" y="579" width="22" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="B4d-1u-pI3"/>
+                                    <constraint firstAttribute="height" constant="30" id="rlv-Lc-YLw"/>
+                                </constraints>
+                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CENTER" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0rO-qr-atf">
                                 <rect key="frame" x="0.0" y="146" width="375" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -31,6 +38,8 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="S57-W1-c7o" secondAttribute="trailing" constant="50" id="ROp-Vz-wEo"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="S57-W1-c7o" secondAttribute="bottom" constant="50" id="Ya5-tP-9cN"/>
                             <constraint firstItem="0rO-qr-atf" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="82" id="aBv-9Q-jll"/>
                             <constraint firstItem="0rO-qr-atf" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="f1D-Xn-Arm"/>
                             <constraint firstAttribute="trailing" secondItem="0rO-qr-atf" secondAttribute="trailing" id="opu-53-1ob"/>
@@ -62,7 +71,6 @@
         <!--Left Side View Controller-->
         <scene sceneID="rb2-B1-Vji">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="EDX-2g-a2b" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="LeftSideViewController" id="fiT-rb-0yM" customClass="LeftSideViewController" customModule="BrandeisClassSearchIPHONE" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="wfR-Ev-drC"/>
@@ -138,6 +146,7 @@
                     </view>
                     <nil key="simulatedTopBarMetrics"/>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EDX-2g-a2b" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="116" y="-963.86806596701661"/>
         </scene>
@@ -198,7 +207,6 @@
         <!--Links Table View Controller-->
         <scene sceneID="y3Z-Fy-KlQ">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="4Zv-zd-msF" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController storyboardIdentifier="LinksTable" id="zpV-Am-1r9" customClass="LinksTableViewController" customModule="BrandeisClassSearchIPHONE" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="lBR-DK-XUi">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
@@ -220,6 +228,7 @@
                         </connections>
                     </tableView>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4Zv-zd-msF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="844" y="710"/>
         </scene>
