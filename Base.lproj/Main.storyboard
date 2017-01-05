@@ -221,14 +221,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <searchBar key="tableFooterView" contentMode="redraw" id="U86-DR-Ffz">
-                            <rect key="frame" x="0.0" y="72" width="375" height="44"/>
+                        <searchBar key="tableHeaderView" contentMode="redraw" id="U86-DR-Ffz">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                             <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="xFn-OX-Eov" id="877-Uu-2p3"/>
+                            </connections>
                         </searchBar>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="nsk-r2-ig2">
-                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="72" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="nsk-r2-ig2" id="Dsv-1Y-ce9">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43"/>
@@ -241,6 +244,9 @@
                             <outlet property="delegate" destination="xFn-OX-Eov" id="HSO-CZ-IJ1"/>
                         </connections>
                     </tableView>
+                    <connections>
+                        <outlet property="searchBar" destination="U86-DR-Ffz" id="mJ9-Fq-ryS"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="h5q-EE-0hL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -259,7 +265,7 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="RNg-3M-whb" id="bNN-x9-0B0">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>

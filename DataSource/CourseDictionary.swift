@@ -19,26 +19,28 @@ class CourseDictionary {
     
     let emptyLine = "."
     let markBooks    = "        BOOKS:"
-    let markName     = "         NAME:"
+    let markName     = "NAME:"
     let markBlock    = "        BLOCK:"
     let markTime     = "        TIMES:"
     let markTeacher  = "      TEACHER:"
     let markSylla    = "     SYLLABUS:"
     let markDesc     = "  DESCRIPTION:"
     let markTerm     = "         TERM:"
-    
+    let suggestionLength = 10
     
     var txt: String
     var input: String?
     var terms: [String]? // An array of all the terms in dictionary
     var allTermDictionary: [[String: [String]]]?
+    var idToNameDic: [String: String]?
+    var nameToIdDic: [String: String]?
     var updateTime: String?
-    
+    var suggestionHistory: [String]?
     
     
     init(){
+        txt = "error"
         print("ERROR: Empty Dictionary")
-        txt = "NOPE"
     }
     
     convenience init(fileName: String){
@@ -47,6 +49,10 @@ class CourseDictionary {
 
     
     init(fileName: String, type: String){
+        txt = "ready"
+        suggestionHistory=[]
+        idToNameDic=[:]
+        nameToIdDic=[:]
         input = fileName+"."+type
         let path = Bundle.main.path(forResource: "Data", ofType: "txt")
         let start = DispatchTime.now() // <<<<<<<<<< Start time
@@ -56,12 +62,12 @@ class CourseDictionary {
                 aStreamReader.close()
             }
             terms=[]
-            txt="ok"
             var i1=0
             var i2=0
             var singleTermDictionary: [String: [String]] = [:]
             var tempCourseInfoArray: [String] = []
-            var prevCourse:String?
+            var prevCourse:String = ""
+            var isName = false
             
             while let line = aStreamReader.nextLine() {
                 
@@ -72,14 +78,15 @@ class CourseDictionary {
                     singleTermDictionary=[:]
                 }
                 if i2%14 == 1 {
-                    if(prevCourse != nil && (!tempCourseInfoArray.isEmpty)){
-                        print("put \(prevCourse), tempCourseInfoArray: \(tempCourseInfoArray[0]+", "+tempCourseInfoArray[1]+"...\n\n")")
-                        singleTermDictionary.updateValue(tempCourseInfoArray, forKey: prevCourse!)
+                    if(prevCourse != "" && (!tempCourseInfoArray.isEmpty)){
+                        isName=true
+                        print("put \(prevCourse), tempCourseInfoArray: \(tempCourseInfoArray[2]+", "+tempCourseInfoArray[1]+"...\n\n")")
+                        singleTermDictionary.updateValue(tempCourseInfoArray, forKey: prevCourse)
                     }//put a new value in the dic with the previos course name
 
                     if line.hasPrefix(updateTime!){ // if we meet a new term
                         i2=0
-                        prevCourse = nil
+                        prevCourse = ""
                         let timeAndTerm = line.components(separatedBy: " ") //get the term
                         terms?.append(timeAndTerm[1]+" "+timeAndTerm[2]) // put the term in the term list
                         allTermDictionary?.append(singleTermDictionary)
@@ -87,7 +94,7 @@ class CourseDictionary {
                     }else{  // if it is still in the courses section
                         tempCourseInfoArray=[]
                         var lines = line.components(separatedBy: " ")
-                        singleTermDictionary.updateValue([], forKey: lines[0]+" "+lines[lines.count-1])
+                        //singleTermDictionary.updateValue([], forKey: lines[0]+" "+lines[lines.count-1])
                         prevCourse=lines[0]+" "+lines[lines.count-1]
                     }
                     
@@ -95,6 +102,17 @@ class CourseDictionary {
                 }else{
                     if line != emptyLine{
                         tempCourseInfoArray.append(line)
+                        if(line.hasPrefix(markName)){
+                            print("xxx")
+                            let courseName = line.replacingOccurrences(of: markName, with: "")
+                            if !courseName.hasPrefix(" LBF") && isName{//hard code 实现 需要改 parse的java code
+                                nameToIdDic?.updateValue(prevCourse, forKey: courseName)
+                                idToNameDic?.updateValue(courseName, forKey: prevCourse)
+                                print("\(prevCourse)  <=>  \(courseName)")
+                                isName=false
+                            }
+                            
+                        }
                     }
                     
                 }
@@ -106,7 +124,7 @@ class CourseDictionary {
             
             
         }else{
-            txt="failed txt"
+            print("failed txt")
         }
         
         let end = DispatchTime.now()   // <<<<<<<<<<   end time
@@ -119,14 +137,42 @@ class CourseDictionary {
     }
     
     
-    
-    
     func latestTerm() -> String{
         if terms == nil{
             print("Error: empty terms")
             return "NONE"
         }
         return terms![0]
+    }
+    
+    
+    func suggestions(courseID: String) -> [String]{
+        let fixedID = tryToUnderstandUserInput(userInput: courseID)
+        var temp:[String] = []
+        var i = 0
+        
+        for s in (idToNameDic?.keys)!{
+            if s.hasPrefix(fixedID) {
+                temp.append(s+"\n"+(idToNameDic?[s])!)
+                i += 1
+            }
+            if i >= suggestionLength{
+                return temp
+            }
+        }
+        
+        for c in (nameToIdDic?.keys)!{
+            if c.uppercased().contains(fixedID){
+                temp.append((nameToIdDic?[c])!+"\n"+c)
+                i += 1
+            
+                if i >= suggestionLength{
+                    return temp
+                }
+            }
+        }
+        
+        return temp
     }
     
     //with the input of a course name, return the array of attributes it has
@@ -160,10 +206,10 @@ class CourseDictionary {
     
     //helper func to reason the user input
     private func tryToUnderstandUserInput(userInput: String) -> String{
-        
-        //to be completed
+        let s = userInput.uppercased()
+        // to be completed
     
-        return userInput
+        return s
     }
     
 }
