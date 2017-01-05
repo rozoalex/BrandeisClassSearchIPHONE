@@ -11,9 +11,9 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    let DataDirectory = NSHomeDirectory()+"/Data.txt"
     var window: UIWindow?
     var centerContainer: MMDrawerController?
+    var courseDictionary: CourseDictionary?
     
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
@@ -21,26 +21,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("didFinishLaunchingWithOptions in AppDelegate")
         
         
-        readFile()
-        
+        courseDictionary = CourseDictionary(fileName: "Data")
         
         let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         
         
         let centerViewController = mainStoryboard.instantiateViewController(withIdentifier: "center")
         
+        let centerVC = centerViewController as! ViewController
+        
+        centerVC.courseDictionary = courseDictionary//set the dictionary to ui
+        
+        
         let leftViewController = mainStoryboard.instantiateViewController(withIdentifier: "LeftSideViewController") as! LeftSideViewController
+        
+        let rightViewController = mainStoryboard.instantiateViewController(withIdentifier: "RightSideViewController") as! RightSideViewController
 
         
         let leftSideNav = UINavigationController(rootViewController: leftViewController)
         
+        let rightSideNav = UINavigationController(rootViewController: rightViewController)
+        
         leftSideNav.navigationBar.isHidden = true //hide the nav bar in LeftMenue
+        
+        rightSideNav.navigationBar.isHidden = true
         
         let centerNav = UINavigationController(rootViewController: centerViewController)
 
-
         
-        centerContainer = MMDrawerController(center: centerNav, leftDrawerViewController: leftSideNav)
+        centerContainer = MMDrawerController(center: centerNav, leftDrawerViewController: leftSideNav, rightDrawerViewController: rightSideNav)
+        
         centerContainer!.openDrawerGestureModeMask = MMOpenDrawerGestureMode.panningCenterView;
         centerContainer!.closeDrawerGestureModeMask = MMCloseDrawerGestureMode.panningCenterView;
         window!.rootViewController = centerContainer
@@ -48,38 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    private func readFile(){
-        let path = Bundle.main.path(forResource: "Data", ofType: "txt")
-        do {
-            var i = 0
-
-            let start = DispatchTime.now() // <<<<<<<<<< Start time
-            
-            if let aStreamReader = StreamReader(path: path!) {
-                defer {
-                    aStreamReader.close()
-                }
-                
-                while let line = aStreamReader.nextLine() {
-                    i += 1
-                    print(line)
-                }
-            }
-            
-            
-            //let txt = try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-            //let myStrings = txt.components(separatedBy: NSCharacterSet.newlines)
-            
-            let end = DispatchTime.now()   // <<<<<<<<<<   end time
-            let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds // <<<<< Difference in nano seconds (UInt64)
-            let timeInterval = Double(nanoTime) / 1_000_000_000 // Technically could overflow for long running tests
-            print("lines:\(i)")
-            print("Time : \(timeInterval) seconds")
-            //print(txt)
-        }catch{
-            print("\(path)")
-        }
-    }
+ 
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

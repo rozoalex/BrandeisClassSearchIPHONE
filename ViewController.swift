@@ -8,10 +8,40 @@
 
 import UIKit
 
-class ViewController: UIViewController {
 
-    override func viewDidLoad() {
+
+class ViewController: UIViewController {
+    
+    var courseDictionary: CourseDictionary? = nil
+    //the sourse of dictionary for search class
+
+    @IBOutlet weak var centerText: UILabel!
+
+    @IBOutlet weak var testingLongText: UITextView!
+    
+    override func viewDidLoad()
+    {
+        //
         super.viewDidLoad()
+        view.endEditing(true)
+        let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        courseDictionary = appDel.courseDictionary!
+        if courseDictionary==nil{
+            centerText.text = "no dictionary"
+        }else if (courseDictionary?.txt.isEmpty)!{
+            centerText.text = "empty dictionary"
+        }else if (courseDictionary?.txt.isEmpty)!{
+            print((courseDictionary?.txt.isEmpty)!)
+            centerText.text = "dictionary ready"
+        }else{
+            centerText.text = "dictionary ready \(courseDictionary?.terms?[0])"
+        }
+        var s=""
+        for term in (courseDictionary?.terms)!{
+            s = s+term+"\n"
+        }
+        testingLongText.text=s
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -26,6 +56,22 @@ class ViewController: UIViewController {
         
         
     }//单击左上 打开菜单
+    
+    
+    @IBAction func RightSideMenuOpen(_ sender: Any) {
+        let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.centerContainer!.toggle(MMDrawerSide.right, animated: true, completion: nil)
+    }
 
 }
 
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        view.addGestureRecognizer(tap)
+    }
+    
+    func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}
