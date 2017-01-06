@@ -26,7 +26,7 @@ class CourseDictionary {
     let markSylla    = "     SYLLABUS:"
     let markDesc     = "  DESCRIPTION:"
     let markTerm     = "         TERM:"
-    let suggestionLength = 10
+    let suggestionLength = 15
     
     var txt: String
     var input: String?
