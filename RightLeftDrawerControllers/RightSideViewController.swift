@@ -13,6 +13,7 @@ class RightSideViewController: UITableViewController, UISearchBarDelegate{
     var searchController: UISearchController!
     var resultController = UITableViewController()
     let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+
     
     @IBOutlet weak var searchBar: UISearchBar!
     
@@ -23,32 +24,28 @@ class RightSideViewController: UITableViewController, UISearchBarDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         print("viewDidLoad in RightSideViewController")
-        self.hideKeyboardWhenTappedAround()
         tableView.estimatedRowHeight = 65
         var textFieldInsideSearchBar = searchBar.value(forKey: "searchField") as? UITextField
-        
         textFieldInsideSearchBar?.textColor = UIColor.white
-        
-    
-//        self.searchController = UISearchController(searchResultsController: resultController)
-//        
-//        self.tableView.tableHeaderView = self.searchController.searchBar
         // Do any additional setup after loading the view.
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(indexPath.row)
+        print("switch to \n\(suggestions[indexPath.row])")
+        let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        try appDel.addHistory(newHistory: suggestions[indexPath.row])
+        doSwitchCenter()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return suggestions.count
     }
     
+
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let mycell = tableView.dequeueReusableCell(withIdentifier: "RightSideTableViewCell", for: indexPath) as! RightSideTableViewCell
         let s: [String] = self.suggestions[indexPath.row].components(separatedBy: "\n")
-        
         mycell.IdText.text = s[0]
         mycell.NameText.text=s[1]
         return mycell;
@@ -63,6 +60,7 @@ class RightSideViewController: UITableViewController, UISearchBarDelegate{
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if (searchText as NSString).length > 2 {
             print(searchText)
+            
             suggestions = appDel.courseDictionary!.suggestions(courseID: searchText)
             var s: String=""
             for strings in suggestions{
@@ -83,9 +81,22 @@ class RightSideViewController: UITableViewController, UISearchBarDelegate{
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         print("searchBarSearchButtonClicked")
+        if suggestions.count > 0 {
+            doSwitchCenter()
+        }
+        
+        
     }
  
-
+    func doSwitchCenter(){
+        view.endEditing(true)
+        let centerViewController = self.storyboard?.instantiateViewController(withIdentifier: "center") as! ViewController
+        let centerNavController = UINavigationController(rootViewController: centerViewController)
+        let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+     
+        appDel.centerContainer!.centerViewController = centerNavController
+        appDel.centerContainer!.toggle(MMDrawerSide.right, animated: true, completion:nil)
+    }
         
         
     

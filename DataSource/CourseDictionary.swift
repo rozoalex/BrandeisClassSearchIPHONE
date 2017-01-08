@@ -35,13 +35,8 @@ class CourseDictionary {
     var idToNameDic: [String: String]?
     var nameToIdDic: [String: String]?
     var updateTime: String?
-    var suggestionHistory: [String]?
+    var history: [String]?
     
-    
-    init(){
-        txt = "error"
-        print("ERROR: Empty Dictionary")
-    }
     
     convenience init(fileName: String){
         self.init(fileName: fileName, type: "txt")
@@ -50,9 +45,10 @@ class CourseDictionary {
     
     init(fileName: String, type: String){
         txt = "ready"
-        suggestionHistory=[]
+        history=[]
         idToNameDic=[:]
         nameToIdDic=[:]
+        allTermDictionary=[]
         input = fileName+"."+type
         let path = Bundle.main.path(forResource: "Data", ofType: "txt")
         let start = DispatchTime.now() // <<<<<<<<<< Start time
@@ -64,6 +60,7 @@ class CourseDictionary {
             terms=[]
             var i1=0
             var i2=0
+            
             var singleTermDictionary: [String: [String]] = [:]
             var tempCourseInfoArray: [String] = []
             var prevCourse:String = ""
@@ -103,7 +100,6 @@ class CourseDictionary {
                     if line != emptyLine{
                         tempCourseInfoArray.append(line)
                         if(line.hasPrefix(markName)){
-                            print("xxx")
                             let courseName = line.replacingOccurrences(of: markName, with: "")
                             if !courseName.hasPrefix(" LBF") && isName{//hard code 实现 需要改 parse的java code
                                 nameToIdDic?.updateValue(prevCourse, forKey: courseName)
@@ -136,6 +132,26 @@ class CourseDictionary {
 
     }
     
+    func addHistory(newHist: String) {
+        if (history != nil) {
+            history?.append(newHist)
+        }
+    }
+    
+    func latestHistory() -> String{
+        if (history != nil){
+            if ((history?.count)! > 0 ){
+                let lines = history![(history?.count)!-1].components(separatedBy: "\n")
+                if(lines.count > 1){
+                    return lines[0]
+                }else{
+                    return history![(history?.count)!-1]
+                }
+            }
+        }
+        return ""
+    }
+    
     
     func latestTerm() -> String{
         if terms == nil{
@@ -157,7 +173,7 @@ class CourseDictionary {
                 i += 1
             }
             if i >= suggestionLength{
-                return temp
+                return temp.sorted()
             }
         }
         
@@ -167,12 +183,13 @@ class CourseDictionary {
                 i += 1
             
                 if i >= suggestionLength{
-                    return temp
+                    return temp.sorted()
+
                 }
             }
         }
         
-        return temp
+        return temp.sorted()
     }
     
     //with the input of a course name, return the array of attributes it has
@@ -197,15 +214,12 @@ class CourseDictionary {
                 }
             }
         }
-        
-        
-        
         print("Can't find the course \(courseID), reasonedInput: \(reasonedInput)")
         return []
     }
     
     //helper func to reason the user input
-    private func tryToUnderstandUserInput(userInput: String) -> String{
+    func tryToUnderstandUserInput(userInput: String) -> String{
         let s = userInput.uppercased()
         // to be completed
     

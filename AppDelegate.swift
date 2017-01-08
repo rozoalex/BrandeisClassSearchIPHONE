@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let centerVC = centerViewController as! ViewController
         
+        centerVC.navigationController?.navigationBar.tintColor = UIColor(red: 63.0/255.0, green: 81.0/255.0, blue: 181.0/255.0, alpha: 1.0)
+        
         centerVC.courseDictionary = courseDictionary//set the dictionary to ui
         
         
@@ -49,7 +51,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let centerNav = UINavigationController(rootViewController: centerViewController)
 
         
+        
+        
         centerContainer = MMDrawerController(center: centerNav, leftDrawerViewController: leftSideNav, rightDrawerViewController: rightSideNav)
+        
+        //UINavigationBar.appearance().barTintColor =
         
         centerContainer!.openDrawerGestureModeMask = MMOpenDrawerGestureMode.panningCenterView;
         centerContainer!.closeDrawerGestureModeMask = MMCloseDrawerGestureMode.panningCenterView;
@@ -59,7 +65,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
  
-
+    func addHistory(newHistory: String){
+        if(courseDictionary != nil){
+            courseDictionary?.addHistory(newHist: newHistory)
+        }else{
+            print("dictionary is nil")
+        }
+        
+    }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
