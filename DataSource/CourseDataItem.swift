@@ -45,6 +45,7 @@ class CourseDataItem {
     var attribute: Attribute
     var rawInput: String
     var resultList = [String]()
+    var isDone = false
     
     //no internet connection during init step, nothing is done
     //resultlList is not empty only if execute() is called
@@ -62,110 +63,38 @@ class CourseDataItem {
         attribute=Attribute.ERROR
     }
     
-    //the method called from outside to start downloading stuffs
-    func execute(){
-        fetchResult()
+    public func appendRawInput(input: String)  {
+        self.rawInput = rawInput + "\n\(input)"
+        print("appended raw Inp: \(self.rawInput)")
     }
     
-    
-    
-    private func fetchResult(){
-        switch  attribute {
-        case .NAME:
-            doFetchName()
-            break
-        case .BOOK:
-            doFetchBook()
-            break
-        case .BLOCK:
-            doFetchBlock()
-            break
-        case .TIME:
-            doFetchTime()
-            break
-        case .TEACHER:
-            doFetchTeacher()
-            break
-        case .SYLLABUS:
-            doFetchSyllabus()
-            break
-        case .DESCRIPTION:
-            doFetchDescription()
-        case .TERM:
-            doFetchTerm()
-            break
-        case .ERROR:
+    //the method called from outside to start downloading stuffs
+    public func execute(){
+        if attribute == .BOOK || attribute == .DESCRIPTION || attribute == .TEACHER || attribute == .SYLLABUS{
+            
+            DispatchQueue.global(qos: .background).async {
+                let start = Date()
+                print("new Background thread for \(self.attribute.getHeader())\n")
+                self.doFetchWithAlamofire(urlString: self.rawInput)
+//                DispatchQueue.main.async {
+//                    print("switching back to main")
+//                }
+                print("Thread for \(self.attribute.getHeader()) is done.\nTakes \(start.timeIntervalSinceNow)")
+            }
+            
+            
+        }else if attribute == .ERROR {
             print("Error ,can't fetch")
-            break
+        }else{
+            doFetchRaw()
         }
     }
     
-    private func doFetchName(){
-        
-    }
-    
-    private func doFetchBook(){
-        
-    }
-    
-    private func doFetchBlock(){
-        
-    }
-    
-    private func doFetchTime(){
-        
-    }
-    
-    private func doFetchTeacher(){
-        
-    }
-    
-    private func doFetchSyllabus(){
+    private func doFetchRaw(){
         resultList.append(rawInput)
+        isDone = true
     }
-    
-    private func doFetchDescription(){
-        
-        
-    }
-    
-    private func doFetchTerm(){
-        
-    }
-    
 
-//    public func doFetch(urlString: String) -> URLSessionDataTask{
-//        var rawHtml = ""
-//        let components = NSURLComponents( string: urlString)!
-//        
-//        let baidu = components.url
-//        let request = URLRequest( url: baidu!)
-//        print("vvv")
-//        let session: URLSession = {
-//            let config = URLSessionConfiguration.default
-//            return URLSession( configuration: config) }()
-//        print("cc")
-//        let task = session.dataTask(with: request) { (data, response, error) -> Void in
-//            
-//            if let htmlData = data {
-//                if let jsonString = NSString( data: htmlData, encoding: String.Encoding.utf8.rawValue) {
-//                    rawHtml = jsonString as String
-//                    print("fetch successful \n*******\n\(rawHtml)\n*******")
-//                    //self.resultList = self.setResult()
-//                }
-//            } else if let requestError = error {
-//                rawHtml = self.Error
-//                print(" Error fetching recent photos: \( requestError)")
-//            } else {
-//                rawHtml = self.Error
-//                print(" Unexpected error with the request")
-//            }
-//            
-//        }
-//        
-//        return task
-//    }
-    
     private func doFetchWithAlamofire(urlString: String) {
         Alamofire.request(urlString).responseString(completionHandler: {
             response in
@@ -175,11 +104,8 @@ class CourseDataItem {
             }else{
                 print("url not working, url: \(urlString)")
             }
-            
-        
-        
         })
-        
+        isDone = true
         
     }
     
@@ -193,6 +119,8 @@ class CourseDataItem {
             return parseWithKannaDescription(htmlString: htmlString)
         case .BOOK:
             return parseWithKannaBook(htmlString: htmlString)
+        case .SYLLABUS:
+            return parseWithKannaSyllabus(htmlString: htmlString)
         default:
             print("setResult is nothing Attri:  \(attribute.getHeader())")
             return []
@@ -202,6 +130,10 @@ class CourseDataItem {
     
     private func parseWithKannaTeacher(htmlString: String) -> [String] {
         return []
+    }
+    
+    private func parseWithKannaSyllabus(htmlString: String) -> [String] {
+        return [rawInput]
     }
     
     //the simplest one
