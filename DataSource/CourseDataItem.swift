@@ -10,34 +10,9 @@ import Foundation
 import Alamofire
 import Kanna
 
-public enum Attribute {
-    case NAME, BOOK, BLOCK, TIME, TEACHER, SYLLABUS, DESCRIPTION, TERM, ERROR
-    func getHeader() -> String{
-        switch  self {
-        case .NAME:
-            return "NAME:"
-        case .BOOK:
-            return "BOOKS:"
-        case .BLOCK:
-            return "BLOCK:"
-        case .TIME:
-            return "TIMES:"
-        case .TEACHER:
-            return "TEACHER:"
-        case .SYLLABUS:
-            return "SYLLABUS:"
-        case .DESCRIPTION:
-            return "DESCRIPTION:"
-        case .TERM:
-            return "TERM:"
-        case .ERROR:
-            print("Error")
-            return ""
-        }
-    }
-}
 
-public let attributeList = [Attribute.NAME,Attribute.BOOK,Attribute.BLOCK,Attribute.TIME,Attribute.TEACHER,Attribute.SYLLABUS,Attribute.DESCRIPTION,Attribute.TERM]
+
+let attributeList = [Attribute.NAME,Attribute.BOOK,Attribute.BLOCK,Attribute.TIME,Attribute.TEACHER,Attribute.SYLLABUS,Attribute.DESCRIPTION,Attribute.TERM]
 
 
 class CourseDataItem {
@@ -68,19 +43,43 @@ class CourseDataItem {
         print("appended raw Inp: \(self.rawInput)")
     }
     
+    
     //the method called from outside to start downloading stuffs
     public func execute(){
         if attribute == .BOOK || attribute == .DESCRIPTION || attribute == .TEACHER || attribute == .SYLLABUS{
-            
-            DispatchQueue.global(qos: .background).async {
+            let queue = DispatchQueue(label: attribute.getHeader())
+            queue.async {
                 let start = Date()
                 print("new Background thread for \(self.attribute.getHeader())\n")
                 self.doFetchWithAlamofire(urlString: self.rawInput)
-//                DispatchQueue.main.async {
-//                    print("switching back to main")
-//                }
+
                 print("Thread for \(self.attribute.getHeader()) is done.\nTakes \(start.timeIntervalSinceNow)")
+                DispatchQueue.main.async {
+                    print("switching back to main")
+                    switch self.attribute{
+                    case .DESCRIPTION:
+                        print("refreshDescCell in courseDataItem")
+                        let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+                        appDelegate.refreshDescCell()
+                        break
+                    case .TEACHER:
+                        
+                        break
+                    case .SYLLABUS:
+                        
+                        break
+                    
+                    case .BOOK:
+                        
+                        break
+                    default:
+                        
+                        break
+                    }
+                    
+                }
             }
+            queue.resume()
             
             
         }else if attribute == .ERROR {

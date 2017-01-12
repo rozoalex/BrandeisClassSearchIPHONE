@@ -15,6 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var centerContainer: MMDrawerController?
     var courseDictionary: CourseDictionary?
     
+    var descCell : TableCellDescription?
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
@@ -65,6 +67,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
  
+    public func setDescCell(descCell: TableCellDescription){
+        self.descCell = descCell
+    }
+    
+    public func refreshDescCell(){
+        if descCell == nil{
+            print("descCell is nil! Can't refresh")
+            return
+        }
+        
+        self.descCell?.refreshData()
+        
+        
+    }
+    
     func addHistory(newHistory: String){
         if(courseDictionary != nil){
             courseDictionary?.addHistory(newHist: newHistory)

@@ -16,6 +16,7 @@ class CourseDataItemStore {
         var blockPos = -1
         var bookPos = -1
         var namePos = -1
+        var termPos = -1
         var time = ""
         
         courseDataItemStore = []
@@ -37,6 +38,9 @@ class CourseDataItemStore {
                 namePos = courseDataItemStore.count
                 courseDataItemStore.append(courseDataItem)
                 break
+            case .TERM:
+                termPos = courseDataItemStore.count
+                courseDataItemStore.append(courseDataItem)
             default:
                 courseDataItemStore.append(courseDataItem)
             }
@@ -47,9 +51,13 @@ class CourseDataItemStore {
             (courseDataItemStore[0], courseDataItemStore[namePos]) = (courseDataItemStore[namePos], courseDataItemStore[0])
         }//move the name to the front
         
+        if termPos != -1{
+            (courseDataItemStore[1], courseDataItemStore[termPos]) = (courseDataItemStore[termPos], courseDataItemStore[1])
+        }
+        
         if time != "" && blockPos != -1 {
             courseDataItemStore[blockPos].appendRawInput(input: time)
-            (courseDataItemStore[1], courseDataItemStore[blockPos]) = (courseDataItemStore[blockPos], courseDataItemStore[1])
+            (courseDataItemStore[2], courseDataItemStore[blockPos]) = (courseDataItemStore[blockPos], courseDataItemStore[2])
         }//combine time and block
         
         if bookPos != -1 {
@@ -59,6 +67,11 @@ class CourseDataItemStore {
         for item in courseDataItemStore{
             item.execute()
         }//execute all, download concurrently
+    }
+
+    
+    public func getResult(index: Int) -> [String]{
+        return courseDataItemStore[index].resultList
     }
     
     public func isDone() -> Bool{

@@ -220,7 +220,7 @@ class CourseDictionary {
     
     //helper func to reason the user input
     func tryToUnderstandUserInput(userInput: String) -> String{
-        let s = userInput.uppercased()
+        let s = userInput.uppercased().trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         // to be completed
     
         return s
