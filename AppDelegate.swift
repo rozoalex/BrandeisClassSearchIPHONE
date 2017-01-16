@@ -12,7 +12,10 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
     var centerContainer: MMDrawerController?
+    var theViewController: ViewController?
+    
     var courseDictionary: CourseDictionary?
     
     var descCell : TableCellDescription?
@@ -31,6 +34,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let centerViewController = mainStoryboard.instantiateViewController(withIdentifier: "center")
         
         let centerVC = centerViewController as! ViewController
+        
+        theViewController = centerVC
         
         centerVC.navigationController?.navigationBar.tintColor = UIColor(red: 63.0/255.0, green: 81.0/255.0, blue: 181.0/255.0, alpha: 1.0)
         
@@ -71,16 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.descCell = descCell
     }
     
-    public func refreshDescCell(){
-        if descCell == nil{
-            print("descCell is nil! Can't refresh")
-            return
-        }
-        
-        self.descCell?.refreshData()
-        
-        
-    }
+    
+   
     
     func addHistory(newHistory: String){
         if(courseDictionary != nil){

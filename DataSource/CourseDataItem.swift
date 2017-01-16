@@ -10,25 +10,54 @@ import Foundation
 import Alamofire
 import Kanna
 
-
+enum Attribute {
+    case NAME, BOOK, BLOCK, TIME, TEACHER, SYLLABUS, DESCRIPTION, TERM, ERROR
+    
+    func getHeader() -> String{
+        switch self {
+            
+        case Attribute.NAME:
+            return "NAME:"
+        case Attribute.BOOK:
+            return "BOOKS:"
+        case Attribute.BLOCK:
+            return "BLOCK:"
+        case Attribute.TIME:
+            return "TIMES:"
+        case Attribute.TEACHER:
+            return "TEACHER:"
+        case Attribute.SYLLABUS:
+            return "SYLLABUS:"
+        case Attribute.DESCRIPTION:
+            return "DESCRIPTION:"
+        case Attribute.TERM:
+            return "TERM:"
+        case Attribute.ERROR:
+            print("Error")
+            return ""
+        }
+    }
+}
 
 let attributeList = [Attribute.NAME,Attribute.BOOK,Attribute.BLOCK,Attribute.TIME,Attribute.TEACHER,Attribute.SYLLABUS,Attribute.DESCRIPTION,Attribute.TERM]
 
 
 class CourseDataItem {
     let Error = "Error"
-    var attribute: Attribute
-    var rawInput: String
+    var attribute: Attribute = Attribute.ERROR
+    var rawInput: String = ""
     var resultList = [String]()
     var isDone = false
     
     //no internet connection during init step, nothing is done
     //resultlList is not empty only if execute() is called
     init(rawDataItem: String) {
+        print("sssgqrhe")
+        let rawData = rawDataItem.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         for s in attributeList{
-            if rawDataItem.hasPrefix(s.getHeader()){
+            if rawData.hasPrefix(getHeader(atrr: s)){
                 attribute = s
-                rawInput = rawDataItem.replacingOccurrences(of: s.getHeader(), with: "").trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                rawInput = rawData.replacingOccurrences(of: getHeader(atrr: s), with: "").trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
                 
                 return
             }
@@ -36,6 +65,31 @@ class CourseDataItem {
         print("Error in CourseDataItem, rawDataItem: \(rawDataItem)")
         rawInput = Error
         attribute=Attribute.ERROR
+    }
+    
+    func getHeader(atrr : Attribute) -> String{
+        switch atrr {
+            
+        case Attribute.NAME:
+            return "NAME:"
+        case Attribute.BOOK:
+            return "BOOKS:"
+        case Attribute.BLOCK:
+            return "BLOCK:"
+        case Attribute.TIME:
+            return "TIMES:"
+        case Attribute.TEACHER:
+            return "TEACHER:"
+        case Attribute.SYLLABUS:
+            return "SYLLABUS:"
+        case Attribute.DESCRIPTION:
+            return "DESCRIPTION:"
+        case Attribute.TERM:
+            return "TERM:"
+        case Attribute.ERROR:
+            print("Error")
+            return ""
+        }
     }
     
     public func appendRawInput(input: String)  {
@@ -49,39 +103,9 @@ class CourseDataItem {
         if attribute == .BOOK || attribute == .DESCRIPTION || attribute == .TEACHER || attribute == .SYLLABUS{
             let queue = DispatchQueue(label: attribute.getHeader())
             queue.async {
-                let start = Date()
                 print("new Background thread for \(self.attribute.getHeader())\n")
                 self.doFetchWithAlamofire(urlString: self.rawInput)
-
-                print("Thread for \(self.attribute.getHeader()) is done.\nTakes \(start.timeIntervalSinceNow)")
-                DispatchQueue.main.async {
-                    print("switching back to main")
-                    switch self.attribute{
-                    case .DESCRIPTION:
-                        print("refreshDescCell in courseDataItem")
-                        let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
-                        appDelegate.refreshDescCell()
-                        break
-                    case .TEACHER:
-                        
-                        break
-                    case .SYLLABUS:
-                        
-                        break
-                    
-                    case .BOOK:
-                        
-                        break
-                    default:
-                        
-                        break
-                    }
-                    
-                }
             }
-            queue.resume()
-            
-            
         }else if attribute == .ERROR {
             print("Error ,can't fetch")
         }else{
@@ -95,16 +119,22 @@ class CourseDataItem {
     }
 
     private func doFetchWithAlamofire(urlString: String) {
+
         Alamofire.request(urlString).responseString(completionHandler: {
             response in
             print("is Successful?? \(response.result.isSuccess)")
             if let html = response.result.value {
-                self.resultList = self.setResult(htmlString: html)
+                let result = self.setResult(htmlString: html)
+                if result.count >= 1 {
+                    self.resultList = result
+                    print("doFetchWithAlamofire ok set result list to \(self.resultList[0])")
+                }
+                self.isDone = true
             }else{
                 print("url not working, url: \(urlString)")
+                self.isDone = true
             }
         })
-        isDone = true
         
     }
     
@@ -153,6 +183,7 @@ class CourseDataItem {
             }
             tempString.append(body[0].text!)
             desc[0]=tempString
+            print("parseWithKannaDescription done  \(desc[0])")
             return desc
         }else{
             print("parseWithKannaDescription Failed  htmlString: \(htmlString)")

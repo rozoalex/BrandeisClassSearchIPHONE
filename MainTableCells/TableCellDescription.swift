@@ -8,25 +8,24 @@
 
 import UIKit
 
+import NVActivityIndicatorView
+
 class TableCellDescription: UITableViewCell {
 
+    public var cellPos : IndexPath?
+    public var cellParent : UITableView?
+    
+    @IBOutlet weak var activityIndicator: NVActivityIndicatorView!
     @IBOutlet weak var descText: UITextView!
     var courseDataItem: CourseDataItem?
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
-    public func setSpinnerForWaitingData(){
-        descText.isHidden = true
-        spinner.isHidden = false
-        print("TableCellDescription waits for data")
-    }
     
-    public func refreshData(){
-        descText.isHidden = false
-        descText.text = courseDataItem?.resultList[0]
-        spinner.isHidden = true
-        print("refresh description cell:\n\(descText.text)")
-    }
+    
+    
+    
+    
     
     
     

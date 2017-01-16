@@ -7,14 +7,18 @@
 //
 
 import UIKit
-
-
+import NVActivityIndicatorView
 
 class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegate {
     var courseDataItemStore: CourseDataItemStore?
     var courseDictionary: CourseDictionary?
+    //var cells: [UITableViewCell]?
     //the sourse of dictionary for search class
+    
+    var isReload = false
 
+    @IBOutlet weak var tableView: UITableView!
+    
     @IBOutlet weak var centerText: UILabel!
 
     @IBOutlet weak var testingLongText: UITextView!
@@ -25,26 +29,16 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
         super.viewDidLoad()
         let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
         courseDictionary = appDel.courseDictionary!
-
         
         if (courseDictionary?.history!.count)! > 0 {
-          //  var ss = ""
-            //for s in (courseDictionary?.history)!{
-              //  ss = ss + s + "\n"
-            //}
-            //testingLongText.text = ss
-            //centerText.text = courseDictionary?.latestHistory()
             let ar = courseDictionary?.search(courseID: (courseDictionary?.latestHistory())!)
             courseDataItemStore = CourseDataItemStore(searchResultArray: ar!)
-            
             var ss = ""
             for s in ar! {
                 ss  = ss + s + "\n"
             }
             print(ss)
             testingLongText.text=ss
-            
-            
         }else{
             var s=""
             for term in (courseDictionary?.terms)!{
@@ -52,82 +46,153 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
             }
             testingLongText.text=s
         }
+        
         UINavigationBar.appearance().barTintColor = UIColor(red: 63.0/255.0, green: 81.0/255.0, blue: 181.0/255.0, alpha: 1.0)
         self.navigationController?.navigationBar.barTintColor=UIColor(red: 63.0/255.0, green: 81.0/255.0, blue: 181.0/255.0, alpha: 1.0)
-
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 200
+       
+        isReload=true
         
     }
+    
+  
+    //this function starts a new thread that checking if there are new cells being done
+    //update the done cells, cells have benn updated are ignored next time 
+    //the first three cells does not require internet, they are not updated anyway
+    private func startMonitoring(staticCells : Int, timeLimitInSeconds: Double){
+        self.isReload=false
+        let queue = DispatchQueue(label: "Monitor")
+        queue.async {
+            print("Start monitoring")
+            while self.courseDataItemStore == nil{}
+            var updatedCells = Set<Int>()
+            var counter = 0
+            let limit = self.courseDataItemStore!.courseDataItemStore.count - staticCells
+            let start = DispatchTime.now()
+            while limit != counter {
+                let timeInSeconds = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds)/1_000_000_000
+                if  timeInSeconds > timeLimitInSeconds  {
+                    print("Running time too long, \(timeInSeconds)!\nExit monitoring")
+                    return
+                }
+                for i in staticCells..<self.courseDataItemStore!.courseDataItemStore.count{
+                    if (self.courseDataItemStore!.courseDataItemStore[i].isDone && !(updatedCells.contains(i))){
+                        updatedCells.insert(i)
+                        counter += 1
+                        let l = self.courseDataItemStore?.getResult(index: i)
+                        if (l?.count)! < 1{
+                            print("update empty")
+                        }else{
+                            print("update cell \(i) with:\(l?[0])")
+                        }
+                        DispatchQueue.main.async {
+                            
+                            self.tableView.reloadRows(at: [IndexPath(row : i, section : 0)], with:.fade)
+                        }
+                        print("monitor reloads rows at \(i), which is a ( \(self.courseDataItemStore?.courseDataItemStore[i].attribute.getHeader()) )cell")
+                    }
+                }
+            }
+            print("Exit monitoring, all cells should be updated")
+            
+        }
+
+    }
+    
+    
 
        
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if courseDataItemStore == nil {
+            print("courseDataItemStore is fucking nil ?! ")
             return 0
         }else{
+            print("courseDataItemStore has \(courseDataItemStore!.courseDataItemStore.count) items ")
             return courseDataItemStore!.courseDataItemStore.count
         }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if isReload {
+            if indexPath.row == (courseDataItemStore?.courseDataItemStore.count)!-1 {
+                startMonitoring(staticCells: 3, timeLimitInSeconds: 10)
+            }
+        }
+        
         let a : Attribute = (courseDataItemStore?.courseDataItemStore[indexPath.row].attribute)!
-        switch a {
-        case .NAME :
-            return setNameCell(table: tableView, index: indexPath)
-        case .BLOCK :
-            return setBlockCell(table: tableView, index: indexPath)
-        case .TERM :
-            return setTermCell(table: tableView, index: indexPath)
-        default:
-            print("dafuq? index:\(indexPath.row)")
+        print("~Making cell at index: \(indexPath.row)  \(a.getHeader())")
+        
+        if a == .NAME {
+            print("~setNameCell at index: \(indexPath.row)")
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellName", for: indexPath) as! TableCellName
+            mycell.courseIDlabel.text = courseDictionary?.latestHistory()
+            print("setNameCell courseID: \(mycell.courseIDlabel.text)")
+            mycell.courseNameLabel.text = courseDataItemStore?.getResult(index: indexPath.row)[0]
+            print("setNameCell courseName: \(mycell.courseNameLabel.text)")
+            return mycell;
+        }else if a == .BLOCK {
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellTime", for: indexPath) as! TableCellTime
+            let result = courseDataItemStore?.getResult(index: indexPath.row)[0].components(separatedBy: "\n")
+            if result == nil{
+                return UITableViewCell()
+            }else if (result?.count)! < 1 {
+                return UITableViewCell()
+            }
+            mycell.blockLabel.text = result?[0]
+            print("setBlockCell : \(mycell.blockLabel.text)")
+            var temp = ""
+            for i in 1..<result!.count {
+                temp = temp + result![i] + "\n"
+            }
+            mycell.timeLabel.text = temp
+            print("setBlockCell : \(temp)")
+            return mycell
+
+        }else if a == .TERM{
+            print("~setTermCell at index: \(indexPath.row)")
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellYear", for: indexPath) as! TableCellYear
+            mycell.yearLabel.text = "20" + (courseDataItemStore?.getResult(index: indexPath.row)[0])!
+            return mycell
+        }else if a == .DESCRIPTION{
+            print("~setDesCell at index: \(indexPath.row)")
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellDescription", for: indexPath) as! TableCellDescription
+            
+            mycell.courseDataItem = courseDataItemStore?.courseDataItemStore[indexPath.row]
+            mycell.cellPos = indexPath
+            mycell.cellParent = tableView
+            
+            
+            
+            if let results = courseDataItemStore?.getResult(index: indexPath.row){
+                if results.count != 0  {
+                    mycell.descText.text = results[0]
+                    mycell.activityIndicator.stopAnimating()
+                    mycell.activityIndicator.isHidden=true
+                }else{
+                    mycell.activityIndicator.startAnimating()
+                }
+                
+            }else{
+                mycell.activityIndicator.startAnimating()
+            }
+            
+            
+            let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+            appDelegate.setDescCell(descCell: mycell)
+            return mycell
+        }else {
+            print("dafuq? index:\(indexPath.row) \n \(a.getHeader())")
             return UITableViewCell ()
         }
-    }
-    
-    //set each table cell
-    //Cells dont need internet connection
-    private func setNameCell(table: UITableView, index: IndexPath) -> UITableViewCell{
-        let mycell = table.dequeueReusableCell(withIdentifier: "TableCellName", for: index) as! TableCellName
-        mycell.courseIDlabel.text = courseDictionary?.latestHistory()
-        print("setNameCell: \(mycell.courseIDlabel.text)")
-        mycell.courseNameLabel.text = courseDataItemStore?.getResult(index: index.row)[0]
-        print("setNameCell: \(mycell.courseNameLabel.text)")
-        return mycell;
         
     }
+
     
-    private func setTermCell(table: UITableView, index: IndexPath) -> UITableViewCell{
-        let mycell = table.dequeueReusableCell(withIdentifier: "TableCellYear", for: index) as! TableCellYear
-        mycell.yearLabel.text = courseDataItemStore?.getResult(index: index.row)[0]
-        return mycell
-    }
     
-    private func setBlockCell(table: UITableView, index: IndexPath) -> UITableViewCell{
-        let mycell = table.dequeueReusableCell(withIdentifier: "TableCellTime", for: index) as! TableCellTime
-        let result = courseDataItemStore?.getResult(index: index.row)[0].components(separatedBy: "\n")
-        if result == nil{
-            return UITableViewCell()
-        }else if (result?.count)! < 1 {
-            return UITableViewCell()
-        }
-        mycell.blockLabel.text = result?[0]
-        print("setBlockCell : \(mycell.blockLabel.text)")
-        var temp = ""
-        for s in result! {
-            temp = temp + "\n" + s
-        }
-        mycell.timeLabel.text = temp
-        print("setBlockCell : \(temp)")
-        return mycell
-    }
-    //Cells dont need internet connection
     
-    private func setDescCell(table: UITableView, index: IndexPath) -> UITableViewCell{
-        let mycell = table.dequeueReusableCell(withIdentifier: "TableCellDescription", for: index) as! TableCellDescription
-        mycell.setSpinnerForWaitingData()
-        let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.setDescCell(descCell: mycell)
-        return mycell
-    }
+    
     
 
     @IBAction func LeftSideMenuOpen(_ sender: Any) {
@@ -144,6 +209,7 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
     }
 
 }
+
 
 //extension UIViewController {
 //    func hideKeyboardWhenTappedAround() {

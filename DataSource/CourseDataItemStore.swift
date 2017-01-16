@@ -13,62 +13,69 @@ class CourseDataItemStore {
     
     
     init(searchResultArray : [String]) {
-        var blockPos = -1
-        var bookPos = -1
-        var namePos = -1
-        var termPos = -1
         var time = ""
-        
         courseDataItemStore = []
+        var tempCourseDataItemStore : [CourseDataItem] = []
         for result in searchResultArray{
             let courseDataItem = CourseDataItem(rawDataItem: result)
-            switch courseDataItem.attribute {
-            case .BLOCK:
-                blockPos = courseDataItemStore.count
-                courseDataItemStore.append(courseDataItem)
-                break
-            case .BOOK:
-                bookPos = courseDataItemStore.count
-                courseDataItemStore.append(courseDataItem)
-                break
-            case .TIME:
+            if courseDataItem.attribute == .TIME {
                 time = courseDataItem.rawInput
+            }
+            tempCourseDataItemStore.append(courseDataItem)
+        }
+        
+        
+        
+        for item in tempCourseDataItemStore {
+            if item.attribute == .NAME{
+                courseDataItemStore.append(item)
                 break
-            case .NAME:
-                namePos = courseDataItemStore.count
-                courseDataItemStore.append(courseDataItem)
+            }
+        }
+        
+        
+        for item in tempCourseDataItemStore {
+            if item.attribute == .TERM{
+                courseDataItemStore.append(item)
                 break
-            case .TERM:
-                termPos = courseDataItemStore.count
-                courseDataItemStore.append(courseDataItem)
-            default:
-                courseDataItemStore.append(courseDataItem)
+            }
+        }
+        
+        for item in tempCourseDataItemStore {
+            if item.attribute == .BLOCK{
+                item.appendRawInput(input: time)
+                courseDataItemStore.append(item)
+                break
+            }
+        }
+        
+       
+        for item in tempCourseDataItemStore {
+            if item.attribute != .BLOCK && item.attribute != .TERM && item.attribute != .NAME {
+                courseDataItemStore.append(item)
             }
             
         }
         
-        if namePos != -1{
-            (courseDataItemStore[0], courseDataItemStore[namePos]) = (courseDataItemStore[namePos], courseDataItemStore[0])
-        }//move the name to the front
         
-        if termPos != -1{
-            (courseDataItemStore[1], courseDataItemStore[termPos]) = (courseDataItemStore[termPos], courseDataItemStore[1])
-        }
-        
-        if time != "" && blockPos != -1 {
-            courseDataItemStore[blockPos].appendRawInput(input: time)
-            (courseDataItemStore[2], courseDataItemStore[blockPos]) = (courseDataItemStore[blockPos], courseDataItemStore[2])
-        }//combine time and block
-        
-        if bookPos != -1 {
-            (courseDataItemStore[courseDataItemStore.count-1], courseDataItemStore[bookPos]) = (courseDataItemStore[bookPos], courseDataItemStore[courseDataItemStore.count-1])
-        }//move the book to the end
         
         for item in courseDataItemStore{
             item.execute()
         }//execute all, download concurrently
     }
+    
+    private func findAndAppendTo (fromArray: [CourseDataItem], toArray: [CourseDataItem], itemAttribute: Attribute, time: String?){
+        
+        
+    }
 
+    
+    
+    
+    public func updateResults(attribute: Attribute, newResults: [String]){
+        
+        
+    }
     
     public func getResult(index: Int) -> [String]{
         return courseDataItemStore[index].resultList
