@@ -168,12 +168,13 @@ class CourseDataItem {
             let teacherName = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//h1//a")
             
             //get teacherPic
-            let teacherPic = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='right']//div[@id='photo']//img")
+            let teacherPic = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='right']//div[@id='photo']//img//@src")
             
             if let url = teacherPic[0].text {
                 print("loading teacher pic")
                 do{
-                    let data = try Data(contentsOf: URL(string : "http://www.gouscollege.com/data/file/college/3543140602_YOpr13xF_EBB88CEB9E9CEB8BA4EC9DB4EC8AA4.jpg")!)
+                    
+                    let data = try Data(contentsOf: URL(string : url)!)
                     pictureList.append(data)
                 } catch {
                     print("loading teacher pic failed")
@@ -189,7 +190,7 @@ class CourseDataItem {
             print("the length is \(teacherName.count)")
             if teacherName.count == 1{
                 results.append(teacherName[0].text!)
-                resultList2.append(teacherPic[0].text!)
+                resultList2.append(teacherName[0].text!)
             }else{
                 print("something wrong with teacherName, count isnt 1")
                 for a in teacherName{
