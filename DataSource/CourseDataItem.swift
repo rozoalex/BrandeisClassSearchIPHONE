@@ -46,7 +46,9 @@ class CourseDataItem {
     let Error = "Error"
     var attribute: Attribute = Attribute.ERROR
     var rawInput: String = ""
-    var resultList = [String]()
+    var resultList = [String]() //the complete info of an item
+    lazy var resultList2 = [String]() //essentials thats needed for the table cell
+    lazy var pictureList = [Data]()
     var isDone = false
     
     //no internet connection during init step, nothing is done
@@ -97,6 +99,7 @@ class CourseDataItem {
         print("appended raw Inp: \(self.rawInput)")
     }
     
+
     
     //the method called from outside to start downloading stuffs
     public func execute(){
@@ -158,7 +161,64 @@ class CourseDataItem {
     
     
     private func parseWithKannaTeacher(htmlString: String) -> [String] {
+        if let doc = Kanna.HTML(html: htmlString, encoding: String.Encoding.utf8) {
+            var results: [String] = []
+            
+            //get the name of the teacher
+            let teacherName = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//h1//a")
+            
+            //get teacherPic
+            let teacherPic = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='right']//div[@id='photo']//img")
+            
+            if let url = teacherPic[0].text {
+                print("loading teacher pic")
+                do{
+                    let data = try Data(contentsOf: URL(string : "http://www.gouscollege.com/data/file/college/3543140602_YOpr13xF_EBB88CEB9E9CEB8BA4EC9DB4EC8AA4.jpg")!)
+                    pictureList.append(data)
+                } catch {
+                    print("loading teacher pic failed")
+                }
+            }
+            
+            //get teacher education
+            let teacherEdu = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='left']//div[@id='degrees']//p//br")
+            
+            
+            
+            
+            print("the length is \(teacherName.count)")
+            if teacherName.count == 1{
+                results.append(teacherName[0].text!)
+                resultList2.append(teacherPic[0].text!)
+            }else{
+                print("something wrong with teacherName, count isnt 1")
+                for a in teacherName{
+                    print(a.text ?? "no value")
+                }
+            }
+            
+            if teacherEdu.count > 0 {
+                resultList2.append(teacherEdu[0].text!)
+                print("the teacher's degree is \(teacherEdu[0].text!)")
+                for a in teacherEdu{
+                    print(a.text ?? "no value")
+                }
+            }else{
+                print("something wrong, the teacherEdu has less thann 1")
+                for a in teacherEdu{
+                    print(a.text ?? "no value")
+                }
+            }
+            
+            
+            
+            
+            return results
+        }
+        print("parseWithKannaTeacher Failed  htmlString: \(htmlString)")
         return []
+        
+        
     }
     
     private func parseWithKannaSyllabus(htmlString: String) -> [String] {
@@ -182,7 +242,7 @@ class CourseDataItem {
                 return []
             }
             tempString.append(body[0].text!)
-            desc[0]=tempString
+            desc[0]=tempString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             print("parseWithKannaDescription done  \(desc[0])")
             return desc
         }else{

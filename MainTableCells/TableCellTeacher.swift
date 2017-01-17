@@ -18,6 +18,8 @@ class TableCellTeacher: UITableViewCell {
     
     @IBOutlet weak var teacherOtherInfo: UILabel!
     
+   
+    
     var cellPos : Int?
     var cellParent : UITableView?
     

@@ -114,6 +114,7 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
         }
     }
     
+    //return and set views according to different items
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if isReload {
             if indexPath.row == (courseDataItemStore?.courseDataItemStore.count)!-1 {
@@ -156,6 +157,7 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
             mycell.yearLabel.text = "20" + (courseDataItemStore?.getResult(index: indexPath.row)[0])!
             return mycell
         }else if a == .DESCRIPTION{
+            
             print("~setDesCell at index: \(indexPath.row)")
             let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellDescription", for: indexPath) as! TableCellDescription
             
@@ -181,6 +183,57 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
             
             let appDelegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
             appDelegate.setDescCell(descCell: mycell)
+            return mycell
+            
+            
+        }else if a == .TEACHER{
+            print("~setDesCell at index: \(indexPath.row)")
+            if let l =  courseDataItemStore?.getResult(index: indexPath.row){
+                if l.count >= 1 {
+                    let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellTeacher", for: indexPath) as! TableCellTeacher
+                    mycell.teacherName.text = l[0]
+                    
+                    if let tempList2 = courseDataItemStore?.courseDataItemStore[indexPath.row].resultList2 {
+                        if tempList2.count > 0{
+                            mycell.teacherEducation.text = tempList2[0]
+                            print("set teacher education  \n \( tempList2[0])")
+                        }
+                    }
+                    
+                    
+                    if let tempDataList = courseDataItemStore?.courseDataItemStore[indexPath.row].pictureList{
+                        if tempDataList.count > 0{
+                            mycell.teacherImage.image = UIImage(data: tempDataList[0])
+                            print("set image of teacher")
+                        }
+                    }
+                    print("teacher has name: \(l[0])")
+                    return mycell
+                }else{
+                    print("the result list of teacher is empty, set spinning")
+                    let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
+                    mycell.startAnimation()
+                    return mycell
+                }
+            }else {
+                
+                let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
+                mycell.startAnimation()
+                return mycell
+                
+            }
+            
+           
+            
+            
+            
+            
+        }else if a == .BOOK{
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
+            mycell.startAnimation()
+            return mycell
+        }else if a == .SYLLABUS{
+            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellSyllabus", for: indexPath)
             return mycell
         }else {
             print("dafuq? index:\(indexPath.row) \n \(a.getHeader())")
@@ -211,22 +264,3 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
 }
 
 
-//extension UIViewController {
-//    func hideKeyboardWhenTappedAround() {
-//        let tap: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
-//        view.addGestureRecognizer(tap)
-//    }
-//    
-//    func hideKeyboardWhenScroll() {
-//        let swipe: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
-//        swipe.direction = UISwipeGestureRecognizerDirection.up
-//        view.addGestureRecognizer(swipe)
-//        let swipeDown: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
-//        swipe.direction = UISwipeGestureRecognizerDirection.down
-//        view.addGestureRecognizer(swipeDown)
-//    }
-//    
-//    func dismissKeyboard() {
-//        view.endEditing(true)
-//    }
-//}
