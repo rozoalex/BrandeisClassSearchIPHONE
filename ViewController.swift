@@ -239,10 +239,8 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
                     if let l2 = courseDataItemStore?.courseDataItemStore[indexPath.row].resultList2{
                         if l2.count == 1 {
                             mycell.bookName.text = l2[0]
-                            mycell.bookOtherInfo.text = ""
                         }else if l2.count == 2 {
-                            mycell.bookName.text = l2[0]
-                            mycell.bookOtherInfo.text = l2[1]
+                            mycell.bookName.text = l2[0]+" "+l2[1]
                         }
                 }else{
                     print("the result for books is nil")
