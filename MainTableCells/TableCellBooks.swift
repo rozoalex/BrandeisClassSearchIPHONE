@@ -11,7 +11,6 @@ import NVActivityIndicatorView
 
 class TableCellBooks: UITableViewCell {
 
-    @IBOutlet weak var activityIndicator: NVActivityIndicatorView!
     
     @IBOutlet weak var bookImage: UIImageView!
     

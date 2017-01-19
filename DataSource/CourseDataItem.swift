@@ -182,9 +182,10 @@ class CourseDataItem {
             }
             
             //get teacher education
-            let teacherEdu = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='left']//div[@id='degrees']//p//br")
+            let teacherEdu = doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='left']//div[@id='degrees']/text()")//[preceding-sibling::br]
             
-            
+            //get the title
+            let teacherTitle =  doc.xpath("//body//div[@id='wrapper']//div[@id='banner']//div[@id='content']//div[@class='left']//div[@id='title']")
             
             
             print("the length is \(teacherName.count)")
@@ -199,15 +200,33 @@ class CourseDataItem {
             }
             
             if teacherEdu.count > 0 {
-                resultList2.append(teacherEdu[0].text!)
                 print("the teacher's degree is \(teacherEdu[0].text!)")
+                var tempEdu = ""
                 for a in teacherEdu{
-                    print(a.text ?? "no value")
+                    if let b = a.text{
+                        let trimed = b.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                        print("-> \(trimed)")
+                        if trimed != "" {
+                            tempEdu = tempEdu + trimed + "\n"
+                        }
+                        
+                    }
+                    
                 }
+                resultList2.append(tempEdu.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
+
             }else{
                 print("something wrong, the teacherEdu has less thann 1")
                 for a in teacherEdu{
                     print(a.text ?? "no value")
+                }
+            }
+            
+            
+            if teacherTitle.count > 0 {
+                if let title = teacherTitle[0].text {
+                    print("teacherTitle: \(title.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))")
+                    resultList2.append(title.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
                 }
             }
             
@@ -232,9 +251,15 @@ class CourseDataItem {
             var desc = [""]
             var tempString = ""
             let requirements = doc.css("body span")
-            for s in requirements{
-                tempString.append(s.text!+"  ")
+            for s in requirements{// get all the university requirements like sn, hum ...
+                if var a = s.text {
+                    a = a.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                    if a != "" {
+                        tempString.append(a+"  ")
+                    }
+                }
             }
+            
             if requirements.count>0{
                 tempString.append("\n")
             }
@@ -253,8 +278,30 @@ class CourseDataItem {
     }
     
     private func parseWithKannaBook(htmlString: String) -> [String] {
+        //let booksInfo = [String]()
+        if let doc = Kanna.HTML(html: htmlString, encoding: String.Encoding.utf8) {
+            let materialsRequired =  doc.xpath("//div[@class='efCourseHeader-list']//p//a[@href='#material-group-name_REQUIRED_1_1']")
+            if materialsRequired.count < 1 {
+                print("no textbooks information")
+                return ["no textbooks information","The instructor might haven't uploaded yet"]
+            }
+            if let materialsRequiredString = materialsRequired[0].text {
+                print("books: \(materialsRequiredString)")
+                resultList2.append(materialsRequiredString)
+            }
+            
+            return ["Books"]
+            
+        }else{
+            print("parseWithKannaBook Failed  htmlString: \(htmlString)")
+            return []
+        }
         
-        return []
+        
+        
+        
+        
+        
     }
     
     

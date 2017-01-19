@@ -89,9 +89,9 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
                         }
                         DispatchQueue.main.async {
                             
-                            self.tableView.reloadRows(at: [IndexPath(row : i, section : 0)], with:.fade)
+                            self.tableView.reloadRows(at: [IndexPath(row : i, section : 0)], with:.automatic)
                         }
-                        print("monitor reloads rows at \(i), which is a ( \(self.courseDataItemStore?.courseDataItemStore[i].attribute.getHeader()) )cell")
+                        print("  ***   Monitor reloads rows at \(i), which is a ( \(self.courseDataItemStore?.courseDataItemStore[i].attribute.getHeader()) )cell")
                     }
                 }
             }
@@ -194,10 +194,18 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
                     mycell.teacherName.text = l[0]
                     
                     if let tempList2 = courseDataItemStore?.courseDataItemStore[indexPath.row].resultList2 {
-                        if tempList2.count > 0{
-                            mycell.teacherEducation.text = tempList2[0]
-                            print("set teacher education  \n \( tempList2[0])")
+                        if tempList2.count > 1{ //set the degrees
+                            mycell.teacherEducation.text = tempList2[1]
+                            print("set teacher education  \n \( tempList2[1])")
+                        }else{
+                            mycell.teacherEducation.text = ""
                         }
+                        if tempList2.count > 2{ //set other info
+                            mycell.teacherOtherInfo.text = tempList2[2]
+                        }else {
+                            mycell.teacherOtherInfo.text = ""
+                        }
+                        
                     }
                     
                     
@@ -223,17 +231,36 @@ class ViewController: UIViewController, UITableViewDataSource,UITableViewDelegat
                 
             }
             
-           
-            
-            
-            
-            
         }else if a == .BOOK{
-            let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
-            mycell.startAnimation()
-            return mycell
+            if let l =  courseDataItemStore?.getResult(index: indexPath.row){
+                //print(l[0])
+                if l.count >= 1 {
+                    let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellBooks", for: indexPath) as! TableCellBooks
+                    if let l2 = courseDataItemStore?.courseDataItemStore[indexPath.row].resultList2{
+                        if l2.count == 1 {
+                            mycell.bookName.text = l2[0]
+                            mycell.bookOtherInfo.text = ""
+                        }else if l2.count == 2 {
+                            mycell.bookName.text = l2[0]
+                            mycell.bookOtherInfo.text = l2[1]
+                        }
+                }else{
+                    print("the result for books is nil")
+                }
+                return mycell
+                }else{
+                    let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
+                    mycell.startAnimation()
+                    return mycell
+                }
+            }else {
+                let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellWaiting", for: indexPath) as! TableCellWaiting
+                mycell.startAnimation()
+                return mycell
+            }
         }else if a == .SYLLABUS{
             let mycell = tableView.dequeueReusableCell(withIdentifier: "TableCellSyllabus", for: indexPath)
+            
             return mycell
         }else {
             print("dafuq? index:\(indexPath.row) \n \(a.getHeader())")
