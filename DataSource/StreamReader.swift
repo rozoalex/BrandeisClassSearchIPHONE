@@ -5,6 +5,8 @@
 //  Created by Yuanze Hu on 12/28/16.
 //  Copyright © 2016 Yuanze Hu. All rights reserved.
 //
+import Foundation
+
 
 class StreamReader  {
     
